@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Script which scans entire network for raspberry Pi's 
+# Script which scans entire network on raspberry Pi's 
 #  Using port 22, use wisely. You could frustrate other users.
 
 execute_scan(){
@@ -14,23 +14,23 @@ execute_scan(){
   echo ""
 }
 
-parse_input(){    
-  if [ "$1" = "" ]; then 
+parse_input(){
+  IFACES=$(ip addr show | egrep '^[[:digit:]]' | awk '{print $2}' | \
+           tr -d ':' | tr '\n' ' ' | rev | cut -c 2- | rev)
+  if [ "$1" = "" ]; then
     echo "- No input given"
-    echo "  enter network interface, e.g. eth0"
+    echo "  enter network interface -> ${IFACES}"
     return
-  fi  
+  fi
   SUBNET=$(ip addr show $1 | grep 'inet ' | awk '{print $4}' | \
            egrep '^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}' -o)
   if [ "${SUBNET}" = "" ]; then
     echo "- Invalid interface given -> $1"
-    IFACES=$(ip addr show | egrep '^[[:digit:]]' | awk '{print $2}' | \
-             tr -d ':' | tr '\n' ' ' | rev | cut -c 2- | rev)
     echo "  enter correct interface -> ${IFACES}"
     return
   else
     execute_scan "${SUBNET}0-255"
-  fi  
+  fi
 }
 
 # Parse input and execute scan
